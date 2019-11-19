@@ -21,3 +21,15 @@ compile with "g++ -std=c++11" PCSR.cpp
   // print out the graph
   pcsr.print_graph();
 ```
+
+For more information see https://ieeexplore.ieee.org/abstract/document/8547566
+
+Please cite as:
+@inproceedings{wheatman2018packed,
+  title={Packed Compressed Sparse Row: A Dynamic Graph Representation},
+  author={Wheatman, Brian and Xu, Helen},
+  booktitle={2018 IEEE High Performance extreme Computing Conference (HPEC)},
+  pages={1--7},
+  year={2018},
+  organization={IEEE}
+}
