@@ -25,6 +25,7 @@ compile with "g++ -std=c++11" PCSR.cpp
 For more information see https://ieeexplore.ieee.org/abstract/document/8547566
 
 Please cite as:
+```
 @inproceedings{wheatman2018packed,
   title={Packed Compressed Sparse Row: A Dynamic Graph Representation},
   author={Wheatman, Brian and Xu, Helen},
@@ -33,3 +34,4 @@ Please cite as:
   year={2018},
   organization={IEEE}
 }
+```
