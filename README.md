@@ -35,3 +35,14 @@ Please cite as:
   organization={IEEE}
 }
 ```
+
+# Subsequent Papers and Projects
+This work was continued and made parallel in the paper [A Parallel Packed Memory Array to Store Dynamic Graphs](https://epubs.siam.org/doi/abs/10.1137/1.9781611976472.3)
+
+The Parallel PMA was later used in the larger Terrace system.  More details can be found in [Terrace: A Hierarchical Graph Container for Skewed Dynamic Graphs](https://dl.acm.org/doi/abs/10.1145/3448016.3457313). The code for terrace which includes the Parallel PMA can be found at https://github.com/PASSIONLab/terrace.
+
+Many ideas from this work also went into the creation of [Streaming Sparse Graphs using Efficient Dynamic Sets](https://ieeexplore.ieee.org/abstract/document/9671836) for which the code can be found at https://github.com/wheatman/SSTGraph.
+
+All of these systems are parallel and much faster than the original PCSR system, but are more complex.  
+
+PCSR is not being updated, but I will review any pull requests. 
