@@ -617,14 +617,24 @@ PCSR::sparse_matrix_vector_multiplication(std::vector<uint32_t> const &v) {
 
 void PCSR::print_graph() {
   int num_vertices = nodes.size();
+
+  // printing the graph matrix column indices
+  for (int i = 0; i < num_vertices; ++i)
+    printf("   %d", i);
+  
+  printf("\n");
+
   for (int i = 0; i < num_vertices; i++) {
     // +1 to avoid sentinel
+
+    // printing the graph matrix row indices
+    printf("%d ", i);
     int matrix_index = 0;
 
     for (uint32_t j = nodes[i].beginning + 1; j < nodes[i].end; j++) {
       if (!is_null(edges.items[j])) {
         while (matrix_index < edges.items[j].dest) {
-          printf("000 ");
+          printf("    ");
           matrix_index++;
         }
         printf("%03d ", edges.items[j].value);
@@ -632,7 +642,7 @@ void PCSR::print_graph() {
       }
     }
     for (uint32_t j = matrix_index; j < num_vertices; j++) {
-      printf("000 ");
+      printf("    ");
     }
     printf("\n");
   }
@@ -716,11 +726,16 @@ int main() {
   // initialize the structure
   // How many nodes you want it to start with
   PCSR pcsr = PCSR(10);
+  printf("Initial Graph: \n");
+  pcsr.print_graph();
 
   // add some edges
   for (int i = 0; i < 5; i++) {
     pcsr.add_edge(i, i, 1);
   }
+  printf("\nAfter adding new edges: \n");
+  pcsr.print_graph();
+
   // update the values of some edges
 
   for (int i = 0; i < 5; i++) {
@@ -728,5 +743,6 @@ int main() {
   }
 
   // print out the graph
+  printf("\nAfter edge updates: \n");
   pcsr.print_graph();
 }
