@@ -2,7 +2,7 @@
 
 Dynamic data structure for sparse graphs.
 
-compile with "g++ -std=c++11" PCSR.cpp
+compile with `g++ -std=c++11 PCSR.cpp`
 
 ```
   // initialize the structure with how many nodes you want it to start with
