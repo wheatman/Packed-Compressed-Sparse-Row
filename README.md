@@ -2,24 +2,78 @@
 
 Dynamic data structure for sparse graphs.
 
-compile with "g++ -std=c++11" PCSR.cpp
+Compile and run ```PCSR.cpp``` as follows
 
 ```
-  // initialize the structure with how many nodes you want it to start with
+g++ -std=c++11 PCSR.cpp -o pcsr
+./pcsr
+```
+
+```
+  // initialize the structure
+  // How many nodes you want it to start with
   PCSR pcsr = PCSR(10);
+  printf("Initial Graph: \n");
+  pcsr.print_graph();
 
   // add some edges
   for (int i = 0; i < 5; i++) {
     pcsr.add_edge(i, i, 1);
   }
-  // update the values of some edges
+  printf("\nAfter adding new edges: \n");
+  pcsr.print_graph();
 
+  // update the values of some edges
   for (int i = 0; i < 5; i++) {
     pcsr.add_edge_update(i, i, 2);
   }
 
   // print out the graph
+  printf("\nAfter edge updates: \n");
   pcsr.print_graph();
+```
+
+Output of the above program is
+
+```
+Initial Graph:
+   0   1   2   3   4   5   6   7   8   9
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+
+After adding new edges:
+   0   1   2   3   4   5   6   7   8   9
+0 001
+1     001
+2         001
+3             001
+4                 001
+5
+6
+7
+8
+9
+
+After edge updates:
+   0   1   2   3   4   5   6   7   8   9
+0 002
+1     002
+2         002
+3             002
+4                 002
+5
+6
+7
+8
+9
 ```
 
 For more information see https://ieeexplore.ieee.org/abstract/document/8547566
