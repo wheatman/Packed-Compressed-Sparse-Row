@@ -260,9 +260,16 @@ public:
     void add_node();
     void add_edge(uint32_t src, uint32_t dest, uint32_t value);
     void add_edge_update(uint32_t src, uint32_t dest, uint32_t value);
+    uint32_t find_value(uint32_t src, uint32_t dest);
+    vector<tuple<uint32_t, uint32_t, uint32_t>> get_edges();
+    uint64_t get_size();
     uint64_t get_n();
     void print_graph();
     void print_array();
+
+    vector<uint32_t> sparse_matrix_vector_multiplication(std::vector<uint32_t> const &v);
+    vector<float> pagerank(std::vector<float> const &node_values);
+    vector<uint32_t> bfs(uint32_t start_node);
 
     uint32_t insert(uint32_t index, edge_t elem, uint32_t src);
     void double_list();
@@ -270,6 +277,19 @@ public:
     void slide_left(int index);
     void fix_sentinel(int32_t node_index, int in);
     void redistribute(int index, int len);
+
+    // methods removed
+    /*
+        1. half_list: Defined but not used anywhere
+    */
+
+    /* methods added
+        1. find_value
+        2. get_edges
+        3. get_size
+        4. sparse_matrix_vector_multiplication
+        5. bfs
+    */
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -324,6 +344,44 @@ void PCSR::add_node()
 
     nodes.push_back(node);
     insert(node.beginning, sentinel, nodes.size() - 1);
+}
+
+uint32_t PCSR::find_value(uint32_t src, uint32_t dest)
+{
+    edge_t e;
+    e.value = 0;
+    e.dest = dest;
+    uint32_t loc =
+        binary_search(&edges, &e, nodes[src].beginning + 1, nodes[src].end);
+    if (!is_null(edges.items[loc]) && edges.items[loc].dest == dest)
+    {
+        return edges.items[loc].value;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+vector<tuple<uint32_t, uint32_t, uint32_t>> PCSR::get_edges()
+{
+    uint64_t n = get_n();
+    vector<tuple<uint32_t, uint32_t, uint32_t>> output;
+
+    for (int i = 0; i < n; i++)
+    {
+        uint32_t start = nodes[i].beginning;
+        uint32_t end = nodes[i].end;
+        for (int j = start + 1; j < end; j++)
+        {
+            if (!is_null(edges.items[j]))
+            {
+                output.push_back(
+                    make_tuple(i, edges.items[j].dest, edges.items[j].value));
+            }
+        }
+    }
+    return output;
 }
 
 uint32_t PCSR::insert(uint32_t index, edge_t elem, uint32_t src)
@@ -625,6 +683,13 @@ uint64_t PCSR::get_n()
     return nodes.size();
 }
 
+uint64_t PCSR::get_size()
+{
+    uint64_t size = nodes.capacity() * sizeof(node_t);
+    size += edges.N * sizeof(edge_t);
+    return size;
+}
+
 void PCSR::print_graph()
 {
     int num_vertices = nodes.size();
@@ -691,6 +756,79 @@ void PCSR::print_array()
     printf("\n\n");
 }
 
+std::vector<uint32_t> PCSR::sparse_matrix_vector_multiplication(std::vector<uint32_t> const &v)
+{
+    std::vector<uint32_t> result(nodes.size(), 0);
+
+    int num_vertices = nodes.size();
+
+    for (int i = 0; i < num_vertices; i++)
+    {
+        // +1 to avoid sentinel
+
+        for (uint32_t j = nodes[i].beginning + 1; j < nodes[i].end; j++)
+        {
+            result[i] += edges.items[j].value * v[edges.items[j].dest];
+        }
+    }
+    return result;
+}
+
+vector<float> PCSR::pagerank(std::vector<float> const &node_values)
+{
+    uint64_t n = get_n();
+
+    vector<float> output(n, 0);
+    float *output_p = output.data();
+    for (int i = 0; i < n; i++)
+    {
+        uint32_t start = nodes[i].beginning;
+        uint32_t end = nodes[i].end;
+
+        // get neighbors
+        // start at +1 for the sentinel
+        float contrib = (node_values[i] / nodes[i].num_neighbors);
+        for (int j = start + 1; j < end; j++)
+        {
+            if (!is_null(edges.items[j]))
+            {
+                output_p[edges.items[j].dest] += contrib;
+            }
+        }
+    }
+    return output;
+}
+
+vector<uint32_t> PCSR::bfs(uint32_t start_node)
+{
+    uint64_t n = get_n();
+    vector<uint32_t> out(n, UINT32_MAX);
+    queue<uint32_t> next;
+    next.push(start_node);
+    out[start_node] = 0;
+
+    while (!next.empty())
+    {
+        uint32_t active = next.front();
+        next.pop();
+
+        uint32_t start = nodes[active].beginning;
+        uint32_t end = nodes[active].end;
+
+        // get neighbors
+        // start at +1 for the sentinel
+        for (int j = start + 1; j < end; j++)
+        {
+            if (!is_null(edges.items[j]) && out[edges.items[j].dest] == UINT32_MAX)
+            {
+                next.push(edges.items[j].dest);
+                out[edges.items[j].dest] = out[active] + 1;
+            }
+        }
+    }
+    return out;
+}
+
 ////////////////////////////////////////////////////////////////////////////
 
 // PCSR Python Module
@@ -731,17 +869,23 @@ PYBIND11_MODULE(pcsr, m)
     py::class_<PCSR>(m, "PCSR")
         .def(py::init<int>(), py::arg("init_n") = 0)
         .def("add_node", &PCSR::add_node)
+        .def("add_edge", &PCSR::add_edge)
+        .def("add_edge_update", &PCSR::add_edge_update)
+        .def("find_value", &PCSR::find_value, "Returns the value of the edge with given source and destination nodes", py::arg("src"), py::arg("dest"))
+        .def("get_edges", &PCSR::get_edges, "Returns the edge list of the graph")
+        .def("get_n", &PCSR::get_n)
+        .def("get_size", &PCSR::get_size, "Returns the memory size taken by the PCSR graph representation")
+        .def("print_graph", &PCSR::print_graph)
+        .def("print_array", &PCSR::print_array)
+        .def("sparse_matrix_vector_multiplication", &PCSR::sparse_matrix_vector_multiplication, "Performs vector multiplication with the sparse PCSR matrix", py::arg("v"))
+        .def("pagerank", &PCSR::pagerank, "Performs the pagerank algorithm", py::arg("node_values"))
+        .def("bfs", &PCSR::bfs, "Applies the BFS algorithm on the graph", py::arg("start_node"))
         .def("insert", &PCSR::insert)
         .def("double_list", &PCSR::double_list)
         .def("slide_right", &PCSR::slide_right)
         .def("slide_left", &PCSR::slide_left)
         .def("fix_sentinel", &PCSR::fix_sentinel)
         .def("redistribute", &PCSR::redistribute)
-        .def("print_graph", &PCSR::print_graph)
-        .def("add_edge", &PCSR::add_edge)
-        .def("add_edge_update", &PCSR::add_edge_update)
-        .def("get_n", &PCSR::get_n)
-        .def("print_array", &PCSR::print_array)
         .def_readwrite("nodes", &PCSR::nodes)
         .def_readwrite("edges", &PCSR::edges)
         .def_readwrite("edge_count", &PCSR::edge_count)
