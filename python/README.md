@@ -1,6 +1,6 @@
 # Packed Compressed Sparse Row for Python
 
-The present README offers comprehensive instructions for utilizing the Python-based implementation of PCSR.
+The present README offers comprehensive instructions for utilizing the Python-based implementation of PCSR. You can follow along by running the python program within the ```python``` directory, where the Shared Object file is located at.
 
 ## Compiling PCSR.cpp into the .so file
 
